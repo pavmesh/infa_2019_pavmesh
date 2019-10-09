@@ -1,0 +1,86 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct  9 09:25:29 2019
+
+@author: ddd
+"""
+
+from tkinter import *
+from random import randrange as rnd, choice
+import time
+root = Tk()
+root.geometry('800x600')
+
+canv = Canvas(root,bg='white')
+canv.pack(fill=BOTH,expand=1)
+e = Entry(root, width=20)
+b = Button(root, text="Очки")
+l = Label(root, bg='black', fg='white', width=20)
+
+colors = ['red','orange','yellow','green','blue']
+'''
+создание шарика
+'''
+def new_ball(skip_timer=False):
+    global x,y,r,ball,dx,dy,id
+    canv.delete(ALL)
+    x = rnd(100,700)
+    y = rnd(100,500)
+    dx = rnd(-10,10)
+    dy = rnd(-10,10)
+    r = rnd(30,50)
+    ball = canv.create_oval(x-r,y-r,x+r,y+r,fill = choice(colors), width=0)
+    if not skip_timer:
+        id = root.after(30000,new_ball)
+'''
+Движение шарика
+'''
+def move_ball():
+    global dx,dy,x,y
+
+    canv.move(ball,dx,dy)
+    x+=dx
+    y+=dy
+    root.after(50,move_ball)
+    rebound_ball()
+'''
+отскок шарика от стены
+'''
+def rebound_ball():
+    global dx,dy,x,y
+    if  y <= r or y >= 600-r:
+        dy=-dy
+    if  x <= r or x >= 800-r:
+        dx=-dx
+'''
+окно с очками, нужно доделать
+'''
+def window():
+    e.pack()
+    b.pack()
+    l.pack()
+        
+#def click(event):
+#  print('click')
+
+'''
+подсчёт очков
+'''
+def summa(event):
+    global S
+    if (event.x-x)**2 + (event.y-y)**2 <= r**2:
+        S+=1
+        print(S)
+    root.after_cancel(id)
+    new_ball()
+    window()
+    
+S = 0
+e.pack()
+b.pack()
+l.pack()
+new_ball()
+move_ball()
+canv.bind('<Button-1>', summa)
+#canv.bind('<Button-1>', click)
+mainloop()
