@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct 16 10:36:01 2019
+
+@author: ddd
+"""
+from tkinter import *
+from random import randrange as rnd, choice
+import time
+root = Tk()
+root.geometry('800x600')
+
+canv = Canvas(root,bg='white')
+canv.pack(fill=BOTH,expand=1)
+e = Entry(root, width=20)
+b = Button(root, text="Очки")
+l = Label(root, bg='black', fg='white', width=200)
+
+colors = ['red','orange','yellow','green','blue']
+
+score = 0
+n = 5
+class Ball():
+    def __init__(self):
+        self.x     = rnd(100,700)
+        self.y     = rnd(100,500)
+        self.r     = rnd(30,50)
+        self.dx    = rnd(-10,10)
+        self.dy    = rnd(-10,10)
+        self.ball  = canv.create_oval(self.x - self.r,self.y - self.r,self.x + self.r,self.y + self.r)
+        self.color = choice(colors)
+        canv.itemconfig(self.ball, fill="red")
+        canv.addtag_withtag("ball", self.ball)
+
+
+    def rebound_ball(self):
+        if  self.y <= self.r or self.y + self.r >= 600:
+            self.dy = -self.dy
+        if  self.x <= self.r or self.x + self.r >= 800:
+            self.dx = -self.dx
+            
+    def move_ball(self):
+        self.x += self.dx
+        self.y += self.dy
+        canv.move(self.ball, self.dx, self.dy)
+
+    def new_create(self):
+        self.x     = rnd(100,700)
+        self.y     = rnd(100,500)
+        self.r     = rnd(30,50)
+        self.dx    = rnd(-10,10)
+        self.dy    = rnd(-10,10)
+        self.color = choice(colors)
+        canv.itemconfig(self.ball, fill=self.color)
+
+balls  = []
+for i in range(n):
+    balls.append(Ball())
+
+def lose_click(event):
+    for i in range(len(balls)):
+        x_old = balls[i].x
+        y_old = balls[i].y
+        balls[i].new_create()
+        canv.move(balls[i].ball, balls[i].x - x_old, balls[i].y - y_old)
+
+def success_click(event):
+    global score
+    for i in range(len(balls)):
+        x_old = balls[i].x
+        y_old = balls[i].y
+        balls[i].new_create()
+        canv.move(balls[i].ball, balls[i].x - x_old, balls[i].y - y_old)
+    score += 1
+    l['text'] = str(score)
+
+def update():
+    for i in range(len(balls)):
+        balls[i].rebound_ball()
+        balls[i].move_ball()
+    root.after(50, update)
+
+
+
+b.pack()
+l.pack()
+update()
+canv.bind('<Button-1>', lose_click)
+canv.tag_bind("ball",'<Button-1>', success_click)
+root.mainloop()
